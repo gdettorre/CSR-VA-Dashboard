@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rarebreed Learning Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f0f4ff;--card:#fff;--border:#e2e8f0;--primary:#4f46e5;--pl:#eef2ff;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--text:#1e293b;--muted:#64748b;--r:12px;--sh:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;font-weight:800;color:var(--primary)}
+.hbadge{font-size:12px;color:var(--muted);background:var(--bg);padding:3px 10px;border-radius:99px;border:1px solid var(--border)}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:2px;overflow-x:auto}
+nav button{padding:13px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button:hover{color:var(--primary)}
+nav button.active{color:var(--primary);border-bottom-color:var(--primary)}
+main{padding:24px 28px;max-width:1300px;margin:0 auto}
+.tab{display:none}.tab.active{display:block}
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.krow3{grid-template-columns:repeat(3,1fr)}
+.kcard{background:var(--card);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh);border:1px solid var(--border)}
+.kcard .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.kcard .val{font-size:30px;font-weight:900;line-height:1}
+.kcard .sub{font-size:12px;color:var(--muted);margin-top:5px}
+.kcard.g .val{color:var(--green)}.kcard.y .val{color:var(--yellow)}.kcard.r .val{color:var(--red)}.kcard.b .val{color:var(--blue)}.kcard.p .val{color:var(--purple)}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.cc{background:var(--card);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh);border:1px solid var(--border)}
+.cc h3{font-size:13px;font-weight:700;margin-bottom:14px;color:var(--text)}
+.cc canvas{max-height:220px}
+.insight{background:var(--pl);border:1px solid #c7d2fe;border-radius:var(--r);padding:14px 18px;margin-bottom:18px}
+.insight h4{font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.insight ul{list-style:disc;padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.insight li{font-size:13px;color:#3730a3}
+.badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:700}
+.bg{background:#dcfce7;color:#166534}.by{background:#fef9c3;color:#854d0e}.br{background:#fee2e2;color:#991b1b}.bb{background:#dbeafe;color:#1e40af}.bp{background:#ede9fe;color:#5b21b6}.bgr{background:#f1f5f9;color:#475569}
+.filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.filters select,.filters input{padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);outline:none}
+.filters input{min-width:200px}
+.tcount{font-size:12px;color:var(--muted);margin-bottom:10px}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:1px solid var(--border)}
+th{background:var(--bg);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:9px 13px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:9px 13px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8f9ff}
+.pbar{display:flex;align-items:center;gap:7px}
+.pbar .track{flex:1;background:var(--border);border-radius:99px;height:6px;overflow:hidden;min-width:60px}
+.pbar .fill{height:100%;border-radius:99px}
+.ccard{background:var(--card);border-radius:var(--r);padding:22px;box-shadow:var(--sh);border:1px solid var(--border)}
+.ccard h3{font-size:15px;font-weight:800;margin-bottom:3px}
+.ccard .sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.plbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px}
+.pb{background:var(--border);border-radius:99px;height:8px;margin-bottom:12px;overflow:hidden}
+.pf{height:100%;border-radius:99px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.si{background:var(--bg);border-radius:8px;padding:9px 12px}
+.si .sl{font-size:11px;color:var(--muted);margin-bottom:2px}
+.si .sv{font-size:15px;font-weight:800}
+@media(max-width:860px){main{padding:14px}.krow{grid-template-columns:1fr 1fr}.cgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#x1F43E; Rarebreed Learning Dashboard</h1>
+  <span class="hbadge">103 Learners</span>
+  <span class="hbadge">2 Programs</span>
+  <span class="hbadge">Updated July 2026</span>
+</header>
+<nav>
+  <button class="active" onclick="showTab('overview',this)">Overview</button>
+  <button onclick="showTab('course',this)">Course Detail</button>
+  <button onclick="showTab('learners',this)">Learner Table</button>
+  <button onclick="showTab('hospitals',this)">Hospitals</button>
+</nav>
+<main>
+
+<div id="overview" class="tab active">
+  <div class="krow">
+    <div class="kcard b"><div class="lbl">Total Learners</div><div class="val">103</div><div class="sub">Across 2 programs</div></div>
+    <div class="kcard g"><div class="lbl">Completed</div><div class="val">29</div><div class="sub">28% completion rate</div></div>
+    <div class="kcard y"><div class="lbl">In Progress</div><div class="val">41</div><div class="sub">40% of learners</div></div>
+    <div class="kcard r"><div class="lbl">Not Started</div><div class="val">33</div><div class="sub">32% of learners</div></div>
+  </div>
+  <div class="insight">
+    <h4>Key Observations</h4>
+    <ul>
+      <li>VetBloom CSR (77 learners, self-enrolled) has a 38% completion rate — 29 done, 16 not yet started.</li>
+      <li>VA Program 2.0 (26 learners, assigned) has 0 completions — 9 in progress, 17 not started.</li>
+      <li>Maine is the most represented state (25 learners), followed by Massachusetts (18).</li>
+      <li>Client Services is the dominant employee type across both programs.</li>
+      <li>Byram Animal Hospital leads enrollment across both programs.</li>
+    </ul>
+  </div>
+  <div class="cgrid">
+    <div class="cc"><h3>Overall Completion Status</h3><canvas id="donut"></canvas></div>
+    <div class="cc"><h3>Status by Program</h3><canvas id="progComp"></canvas></div>
+    <div class="cc"><h3>Learners by State</h3><canvas id="stateChart"></canvas></div>
+    <div class="cc"><h3>Learners by Employee Type</h3><canvas id="empChart"></canvas></div>
+  </div>
+</div>
+
+<div id="course" class="tab">
+  <div class="cgrid">
+    <div class="ccard">
+      <h3>VetBloom CSR Program</h3>
+      <div class="sub">Self Enrolled &middot; 77 learners &middot; Client Services focus</div>
+      <div class="plbl"><span>Completed (29)</span><span>38%</span></div>
+      <div class="pb"><div class="pf" style="width:38%;background:var(--green)"></div></div>
+      <div class="plbl"><span>In Progress (32)</span><span>42%</span></div>
+      <div class="pb"><div class="pf" style="width:42%;background:var(--yellow)"></div></div>
+      <div class="plbl"><span>Not Started (16)</span><span>21%</span></div>
+      <div class="pb"><div class="pf" style="width:21%;background:var(--red)"></div></div>
+      <div class="sgrid">
+        <div class="si"><div class="sl">Enrollment Type</div><div class="sv">Self Enrolled</div></div>
+        <div class="si"><div class="sl">Unique Hospitals</div><div class="sv" id="csrHospCount">-</div></div>
+        <div class="si"><div class="sl">Avg Active Time</div><div class="sv" id="csrAvgHours" style="color:var(--blue)">-</div></div>
+        <div class="si"><div class="sl">Completions</div><div class="sv" style="color:var(--green)">29</div></div>
+      </div>
+    </div>
+    <div class="ccard">
+      <h3>VA Program 2.0</h3>
+      <div class="sub">Assigned &middot; 26 learners &middot; Veterinary Technician focus</div>
+      <div class="plbl"><span>Completed (0)</span><span>0%</span></div>
+      <div class="pb"><div class="pf" style="width:0%;background:var(--green)"></div></div>
+      <div class="plbl"><span>In Progress (9)</span><span>35%</span></div>
+      <div class="pb"><div class="pf" style="width:35%;background:var(--yellow)"></div></div>
+      <div class="plbl"><span>Not Started (17)</span><span>65%</span></div>
+      <div class="pb"><div class="pf" style="width:65%;background:var(--red)"></div></div>
+      <div class="sgrid">
+        <div class="si"><div class="sl">Enrollment Type</div><div class="sv">Assigned</div></div>
+        <div class="si"><div class="sl">Unique Hospitals</div><div class="sv" id="vaHospCount">-</div></div>
+        <div class="si"><div class="sl">Avg Active Time</div><div class="sv" id="vaAvgHours" style="color:var(--purple)">-</div></div>
+        <div class="si"><div class="sl">Completions</div><div class="sv" style="color:var(--red)">0 &#x26A0;</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cgrid">
+    <div class="cc"><h3>Employee Types - VetBloom CSR</h3><canvas id="csrEmpChart"></canvas></div>
+    <div class="cc"><h3>Employee Types - VA Program 2.0</h3><canvas id="vaEmpChart"></canvas></div>
+  </div>
+</div>
+
+<div id="learners" class="tab">
+  <div class="filters">
+    <select id="fCourse" onchange="renderLearners()"><option value="">All Courses</option><option value="CSR">VetBloom CSR</option><option value="VA">VA Program 2.0</option></select>
+    <select id="fStatus" onchange="renderLearners()"><option value="">All Statuses</option><option value="COMPLETED">Completed</option><option value="IN_PROGRESS">In Progress</option><option value="NOT_STARTED">Not Started</option></select>
+    <select id="fState" onchange="renderLearners()"><option value="">All States</option></select>
+    <select id="fEmp" onchange="renderLearners()"><option value="">All Employee Types</option></select>
+    <input id="fSearch" placeholder="Search name or hospital..." oninput="renderLearners()">
+  </div>
+  <div class="tcount" id="lcount"></div>
+  <table>
+    <thead><tr><th>Name</th><th>Course</th><th>Hospital</th><th>State</th><th>Employee Type</th><th>Status</th><th>Active Hrs</th><th>Started</th></tr></thead>
+    <tbody id="ltbody"></tbody>
+  </table>
+</div>
+
+<div id="hospitals" class="tab">
+  <div class="krow krow3">
+    <div class="kcard b"><div class="lbl">Total Hospitals</div><div class="val" id="totalHosp">-</div><div class="sub">Across both programs</div></div>
+    <div class="kcard p"><div class="lbl">In Both Programs</div><div class="val" id="bothHosp">-</div><div class="sub">Have CSR &amp; VA learners</div></div>
+    <div class="kcard g"><div class="lbl">Largest Enrollment</div><div class="val" id="bigHospVal">-</div><div class="sub" id="bigHospName">-</div></div>
+  </div>
+  <div class="cgrid">
+    <div class="cc"><h3>Top 12 Hospitals by Enrollment</h3><canvas id="hospBar"></canvas></div>
+    <div class="cc"><h3>Completion Rate (2+ Learners)</h3><canvas id="hospComp"></canvas></div>
+  </div>
+  <div class="filters">
+    <select id="hfProg" onchange="renderHosp()"><option value="">All Programs</option><option value="csr">CSR Only</option><option value="va">VA Only</option><option value="both">In Both</option></select>
+    <select id="hfSort" onchange="renderHosp()"><option value="total">Sort: Enrollment</option><option value="rate">Sort: Completion %</option><option value="az">Sort: A-Z</option></select>
+    <input id="hfSearch" placeholder="Search hospital..." oninput="renderHosp()">
+  </div>
+  <table>
+    <thead><tr><th>Hospital</th><th>State</th><th>CSR</th><th>VA</th><th>Total</th><th>Done</th><th>In Progress</th><th>Not Started</th><th>Completion %</th><th>Programs</th></tr></thead>
+    <tbody id="htbody"></tbody>
+  </table>
+</div>
+
+</main>
+<script>
+var DATA = [{"name": "Nathan Acety", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "status": "COMPLETED", "hours": 3.87, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Care Manager", "dateStarted": "03/13/2026 12:02:18 AM"}, {"name": "Jessica Adams", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Brookfield Animal Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 4.14, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/23/2026 8:37:00 PM"}, {"name": "Aaron Andreasen", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 180.81, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/30/2026 2:57:27 PM"}, {"name": "Rachel Approbato", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Maine Veterinary Medical Center", "state": "Maine", "status": "IN_PROGRESS", "hours": 9.13, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Care Supervisor", "dateStarted": "04/08/2026 7:46:29 PM"}, {"name": "Lisa Arrigoni", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Prospect Veterinary Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 0.51, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "06/12/2026 8:13:02 PM"}, {"name": "Katie Bauer", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hometown Veterinary Care", "state": "Maine", "status": "COMPLETED", "hours": 16.24, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/26/2026 1:10:22 PM"}, {"name": "Beth Beecham", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "status": "COMPLETED", "hours": 12.3, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/25/2026 12:54:05 PM"}, {"name": "Joanna Bell", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Edgewater", "state": "Maryland", "status": "NOT_STARTED", "hours": 86.08, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "05/13/2026 4:37:25 PM"}, {"name": "Tammy Benton", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "status": "IN_PROGRESS", "hours": 5.81, "empType": "Client Services", "assignment": "Self Enrolled", "title": "ECC Liaison - PA", "dateStarted": "03/15/2026 9:59:59 PM"}, {"name": "Savannah Billado-Vincent", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "status": "COMPLETED", "hours": 40.97, "empType": "Veterinary Support", "assignment": "Self Enrolled", "title": "Client Care Specialist", "dateStarted": "04/28/2026 1:31:12 PM"}, {"name": "Brigid E Blake", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Suncook River Veterinary Clinic", "state": "New Hampshire", "status": "NOT_STARTED", "hours": 0.01, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "06/04/2026 3:05:05 PM"}, {"name": "Kristen Breitmaier", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 5.61, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/09/2026 6:31:16 PM"}, {"name": "Ben Bricker", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Sunray Animal Clinic", "state": "Maine", "status": "NOT_STARTED", "hours": 5.14, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/24/2026 12:30:38 PM"}, {"name": "Evie Bricker", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Sunray Animal Clinic", "state": "Maine", "status": "IN_PROGRESS", "hours": 2.31, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/23/2026 7:28:31 PM"}, {"name": "Kate Bures", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "status": "IN_PROGRESS", "hours": 3.86, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - PA", "dateStarted": "03/24/2026 11:32:51 PM"}, {"name": "Christina Burton", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "status": "COMPLETED", "hours": 14.18, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/27/2026 1:07:42 PM"}, {"name": "Bonita Cannon", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "status": "IN_PROGRESS", "hours": 14.54, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/28/2026 5:52:33 PM"}, {"name": "Katherine Carman", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "New Hyde Park Animal Hospital", "state": "New York", "status": "IN_PROGRESS", "hours": 17.55, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "04/02/2026 9:09:07 PM"}, {"name": "Paula Cintron", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "status": "IN_PROGRESS", "hours": 0.75, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Care Specialist", "dateStarted": "04/05/2026 10:44:12 PM"}, {"name": "Meghan Corless", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Cambridge Veterinary Care", "state": "Massachusetts", "status": "COMPLETED", "hours": 27.14, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "02/18/2026 7:40:09 PM"}, {"name": "Ivana Coutinho", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "status": "NOT_STARTED", "hours": 6.13, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/28/2026 1:28:44 AM"}, {"name": "Maddy Cronis", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "status": "IN_PROGRESS", "hours": 173.27, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/08/2026 5:54:39 PM"}, {"name": "Morgan Davis", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hometown Veterinary Care", "state": "Maine", "status": "COMPLETED", "hours": 9.4, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Practice Manager", "dateStarted": "04/07/2026 7:50:33 PM"}, {"name": "Rebecca Davis", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 1.99, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "06/26/2026 5:14:37 PM"}, {"name": "Gianna Dettorre", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Rarebreed Veterinary Partners Corporate", "state": "Maine", "status": "IN_PROGRESS", "hours": 0.0, "empType": "Corporate", "assignment": "Self Enrolled", "title": "Program Manager", "dateStarted": "05/12/2026 12:49:52 PM"}, {"name": "Penelope Dick", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 8.73, "empType": "Veterinary Support", "assignment": "Assigned", "title": "Technician Assistant", "dateStarted": "04/27/2026 9:41:40 PM"}, {"name": "Penelope Dick", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "COMPLETED", "hours": 4.97, "empType": "Veterinary Support", "assignment": "Self Enrolled", "title": "Technician Assistant", "dateStarted": "03/18/2026 7:26:38 PM"}, {"name": "Caitlyn Dispensa", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Saugerties Animal Hospital", "state": "New York", "status": "COMPLETED", "hours": 3.22, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/24/2026 2:02:25 PM"}, {"name": "Elizabeth Downs", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "status": "NOT_STARTED", "hours": 1.81, "empType": "Veterinary Support", "assignment": "Self Enrolled", "title": "Technician Assistant", "dateStarted": "04/08/2026 7:21:06 PM"}, {"name": "Hannah Dunn", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Falmouth Veterinary Hospital", "state": "Maine", "status": "COMPLETED", "hours": 12.51, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "03/26/2026 5:03:43 PM"}, {"name": "Lauren Flournoy", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Maine Veterinary Medical Center", "state": "Maine", "status": "IN_PROGRESS", "hours": 0.8, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Care Supervisor", "dateStarted": "03/25/2026 6:56:27 PM"}, {"name": "Anna Foster", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "PetMedic - Portland", "state": "Maine", "status": "IN_PROGRESS", "hours": 11.9, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "04/03/2026 4:08:14 PM"}, {"name": "Raven Fox", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "NOVA Cat Clinic", "state": "Virginia", "status": "COMPLETED", "hours": 4.19, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/13/2026 8:58:47 PM"}, {"name": "Tracy Fox", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 39.54, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/30/2026 12:15:18 PM"}, {"name": "Cassidy Goulet", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Post Road Veterinary Clinic", "state": "Maine", "status": "NOT_STARTED", "hours": 33.91, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/24/2026 12:15:56 PM"}, {"name": "Amira Grymwell", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Kindred Spirits Veterinary Clinic", "state": "Maine", "status": "COMPLETED", "hours": 5.29, "empType": "Veterinary Support", "assignment": "Self Enrolled", "title": "Technician Assistant", "dateStarted": "05/19/2026 2:23:31 PM"}, {"name": "Reanna Hagedorn", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "VSC Leesburg", "state": "Virginia", "status": "NOT_STARTED", "hours": 7.32, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Care Specialist - Lead", "dateStarted": "05/01/2026 4:22:19 PM"}, {"name": "Althea Hall", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "status": "IN_PROGRESS", "hours": 0.36, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "07/06/2026 1:21:25 PM"}, {"name": "Jennifer Hamond", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "status": "COMPLETED", "hours": 4.42, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/01/2026 11:19:28 PM"}, {"name": "Saige Harris", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "IN_PROGRESS", "hours": 17.49, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/23/2026 5:38:16 PM"}, {"name": "Saige Harris", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "COMPLETED", "hours": 6.07, "empType": "Veterinary Technician", "assignment": "Self Enrolled", "title": "Veterinary Assistant", "dateStarted": "04/22/2026 7:01:19 PM"}, {"name": "Victoria Hashey", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Kindred Spirits Veterinary Clinic", "state": "Maine", "status": "NOT_STARTED", "hours": 0.54, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Office Manager", "dateStarted": "04/08/2026 12:30:43 PM"}, {"name": "Jenna Horn", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Kelly's Animal Hospital", "state": "Florida", "status": "IN_PROGRESS", "hours": 2.87, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "05/13/2026 6:21:43 PM"}, {"name": "Trea Hsieh-Lewis", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Portland", "state": "Maine", "status": "NOT_STARTED", "hours": 22.72, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "05/14/2026 5:12:32 AM"}, {"name": "Christal Hutchins", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Kennebunk Veterinary Hospital", "state": "Maine", "status": "IN_PROGRESS", "hours": 45.21, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "04/23/2026 5:45:13 PM"}, {"name": "Katelyn Hutchinson", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Norway Veterinary Hospital", "state": "Maine", "status": "NOT_STARTED", "hours": 0.01, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "05/09/2026 6:02:59 PM"}, {"name": "Sharon Jestand", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Saugerties Animal Hospital", "state": "New York", "status": "COMPLETED", "hours": 17.29, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "04/21/2026 2:01:22 PM"}, {"name": "Aniyah Jeter", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Edgewater", "state": "Maryland", "status": "NOT_STARTED", "hours": 0.01, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "07/07/2026 12:05:09 PM"}, {"name": "Nicole Keyser", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "NOT_STARTED", "hours": 0.0, "empType": "Veterinary Support", "assignment": "Assigned", "title": "Technician Assistant", "dateStarted": "06/11/2026 2:23:46 PM"}, {"name": "Jennifer Krieger", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 0.0, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "05/23/2026 1:40:44 PM"}, {"name": "Daisy Llamas", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Edgewater", "state": "Maryland", "status": "NOT_STARTED", "hours": 2.69, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "05/06/2026 7:16:45 PM"}, {"name": "Sarah Lumenello", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Apple Country Animal Hospital", "state": "Massachusetts", "status": "NOT_STARTED", "hours": 0.9, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "03/13/2026 2:45:53 PM"}, {"name": "Mey Mateo", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 7.01, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/09/2026 11:28:18 PM"}, {"name": "Caytee McCall", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Prospect Veterinary Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 320.33, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "04/27/2026 7:59:26 PM"}, {"name": "Tammy McCarty", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Kelly's Animal Hospital", "state": "Florida", "status": "COMPLETED", "hours": 0.0, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "09/26/2024 2:27:56 PM"}, {"name": "Leiah McDermott", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hudson Veterinary Care", "state": "New Hampshire", "status": "NOT_STARTED", "hours": 0.0, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative - Lead", "dateStarted": "04/30/2026 6:56:46 PM"}, {"name": "Emily Meck", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "status": "NOT_STARTED", "hours": 4.08, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - PA", "dateStarted": "03/12/2026 8:35:20 PM"}, {"name": "Lauren Mehl", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "status": "IN_PROGRESS", "hours": 0.02, "empType": "Veterinary Technician", "assignment": "Self Enrolled", "title": "Veterinary Assistant", "dateStarted": "05/27/2026 6:58:11 PM"}, {"name": "Jeanette Mellen", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Claremont Animal Hospital", "state": "New Hampshire", "status": "IN_PROGRESS", "hours": 6.74, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/23/2026 6:38:19 PM"}, {"name": "Tammy Metras", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "status": "COMPLETED", "hours": 2.24, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/14/2026 11:51:08 AM"}, {"name": "Emilee Miller", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Claremont Animal Hospital", "state": "New Hampshire", "status": "IN_PROGRESS", "hours": 3.03, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/22/2026 11:38:21 AM"}, {"name": "Pamela Montgomery", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "status": "IN_PROGRESS", "hours": 0.03, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "05/10/2026 1:51:25 AM"}, {"name": "Elizabeth Moody", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hudson Veterinary Care", "state": "New Hampshire", "status": "IN_PROGRESS", "hours": 0.02, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative", "dateStarted": "05/19/2026 6:09:42 PM"}, {"name": "Wanda Mossie", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Royersford Veterinary Hospital", "state": "Pennsylvania", "status": "IN_PROGRESS", "hours": 0.04, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - PA", "dateStarted": "05/05/2026 3:10:22 PM"}, {"name": "Angela Moutria", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hometown Veterinary Care", "state": "Maine", "status": "IN_PROGRESS", "hours": 4.12, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Office Manager", "dateStarted": "04/29/2026 12:37:08 PM"}, {"name": "Janet Parenti", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "COMPLETED", "hours": 5.23, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Practice Manager", "dateStarted": "04/16/2026 11:02:43 PM"}, {"name": "Abigail Perky", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Adirondack Veterinary Hospital", "state": "New York", "status": "NOT_STARTED", "hours": 0.42, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "04/29/2026 6:03:59 PM"}, {"name": "Gianna Pires", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "IN_PROGRESS", "hours": 14.33, "empType": "Veterinary Support", "assignment": "Assigned", "title": "Technician Assistant", "dateStarted": "04/23/2026 5:35:09 PM"}, {"name": "Gianna Pires", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "COMPLETED", "hours": 10.68, "empType": "Veterinary Support", "assignment": "Self Enrolled", "title": "Technician Assistant", "dateStarted": "04/17/2026 5:28:40 PM"}, {"name": "Kaylee Pisarski", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "status": "IN_PROGRESS", "hours": 10.91, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - PA", "dateStarted": "03/13/2026 8:31:13 PM"}, {"name": "Tanya Pomelow", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hometown Veterinary Care", "state": "Maine", "status": "IN_PROGRESS", "hours": 1.39, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "06/04/2026 4:22:19 PM"}, {"name": "Julie Ramey", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "status": "COMPLETED", "hours": 10.51, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "03/27/2026 12:35:26 PM"}, {"name": "Danielle Ramsey", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Suncook River Veterinary Clinic", "state": "New Hampshire", "status": "NOT_STARTED", "hours": 4.19, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "06/03/2026 7:55:41 PM"}, {"name": "Tori Rand", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "IN_PROGRESS", "hours": 1.28, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "06/25/2026 5:54:26 PM"}, {"name": "Gesa Rappleyea", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Saugerties Animal Hospital", "state": "New York", "status": "COMPLETED", "hours": 6.78, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/29/2026 2:57:11 PM"}, {"name": "Tori Ratcliffe", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "status": "NOT_STARTED", "hours": 7.81, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/30/2026 5:19:23 AM"}, {"name": "Sheri Reynolds", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Sunray Animal Clinic", "state": "Maine", "status": "IN_PROGRESS", "hours": 0.25, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/25/2026 1:26:27 PM"}, {"name": "Cheyenne Roy", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Mann Memorial Veterinary Clinic", "state": "Maine", "status": "IN_PROGRESS", "hours": 0.02, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "06/18/2026 7:38:02 PM"}, {"name": "Maeve Ryan", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Plattsburgh Animal Hospital", "state": "New York", "status": "COMPLETED", "hours": 21.27, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "04/25/2026 6:20:55 PM"}, {"name": "Shana Sanders", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "status": "COMPLETED", "hours": 4.23, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/01/2026 8:19:33 PM"}, {"name": "Meghan Sandrib", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 5.39, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant - CVA", "dateStarted": "05/13/2026 2:25:11 PM"}, {"name": "Ranjita Sarki", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "status": "IN_PROGRESS", "hours": 0.02, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "05/03/2026 3:58:46 PM"}, {"name": "Richard Shah", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Cambridge Veterinary Care", "state": "Massachusetts", "status": "COMPLETED", "hours": 2.24, "empType": "Hospital Administration", "assignment": "Assigned", "title": "Practice Manager", "dateStarted": "02/24/2026 7:34:37 PM"}, {"name": "Jess Silva", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Brookfield Animal Hospital", "state": "Connecticut", "status": "NOT_STARTED", "hours": 0.55, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/13/2026 2:13:32 PM"}, {"name": "Jennifer Silver", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Plattsburgh Animal Hospital", "state": "New York", "status": "IN_PROGRESS", "hours": 3.36, "empType": "Client Services", "assignment": "Self Enrolled", "title": "nan", "dateStarted": "05/13/2026 7:19:12 PM"}, {"name": "April Sitterson", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Kelly's Animal Hospital", "state": "Florida", "status": "NOT_STARTED", "hours": 0.04, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "06/09/2026 2:34:23 PM"}, {"name": "Melissa Sivacek", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "status": "NOT_STARTED", "hours": 0.04, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/09/2026 6:38:29 PM"}, {"name": "Reilly Smith", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Southern Maine Veterinary Care", "state": "Maine", "status": "IN_PROGRESS", "hours": 33.3, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/28/2026 1:41:17 PM"}, {"name": "Christy Snowdon", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Sunray Animal Clinic", "state": "Maine", "status": "NOT_STARTED", "hours": 0.0, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/02/2026 8:01:26 PM"}, {"name": "Kim Springer", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "COMPLETED", "hours": 457.77, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Practice Manager", "dateStarted": "04/20/2026 4:44:36 PM"}, {"name": "Jacqueline Stehm", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "status": "NOT_STARTED", "hours": 0.42, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Practice Manager", "dateStarted": "07/02/2026 12:36:45 PM"}, {"name": "Kathleen Steitz", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "status": "IN_PROGRESS", "hours": 3.74, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - PA", "dateStarted": "03/23/2026 4:28:13 PM"}, {"name": "Becky Taisey", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Freeport", "state": "Maine", "status": "IN_PROGRESS", "hours": 8.43, "empType": "Veterinary Support", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "05/26/2026 4:53:54 PM"}, {"name": "Meghann Terrien", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "status": "NOT_STARTED", "hours": 0.05, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "06/03/2026 8:02:47 PM"}, {"name": "Karen Thompson", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Byram Animal Hospital", "state": "New Jersey", "status": "COMPLETED", "hours": 5.24, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/17/2026 1:40:58 PM"}, {"name": "Victoria Vanderbilt", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "status": "NOT_STARTED", "hours": 3.27, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/28/2026 9:56:15 AM"}, {"name": "Courtney Ventrone", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "PetMedic - Warwick", "state": "Rhode Island", "status": "IN_PROGRESS", "hours": 0.0, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "03/13/2026 1:20:43 AM"}, {"name": "Lori Vogt", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "status": "COMPLETED", "hours": 3.31, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/28/2026 8:48:00 PM"}, {"name": "Brandie Washington", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Hometown Veterinary Care", "state": "Maine", "status": "IN_PROGRESS", "hours": 4.3, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative", "dateStarted": "04/29/2026 2:39:45 PM"}, {"name": "Carolyn Weinheimer", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "Apple Country Animal Hospital", "state": "Massachusetts", "status": "COMPLETED", "hours": 3.67, "empType": "Hospital Administration", "assignment": "Self Enrolled", "title": "Practice Manager", "dateStarted": "05/04/2026 2:18:17 PM"}, {"name": "Cameryn Whitcomb", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "status": "IN_PROGRESS", "hours": 22.39, "empType": "Client Services", "assignment": "Assigned", "title": "Client Service Representative - Lead", "dateStarted": "05/13/2026 4:42:41 PM"}, {"name": "Cameryn Whitcomb", "course": "VetBloom Client Service Representative Program", "courseShort": "CSR", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "status": "COMPLETED", "hours": 2.82, "empType": "Client Services", "assignment": "Self Enrolled", "title": "Client Service Representative - Lead", "dateStarted": "04/01/2026 8:20:19 PM"}, {"name": "Anna Yatskar", "course": "VA Program 2.0", "courseShort": "VA", "hospital": "Southern Maine Veterinary Care", "state": "Maine", "status": "NOT_STARTED", "hours": 56.8, "empType": "Veterinary Technician", "assignment": "Assigned", "title": "Veterinary Assistant", "dateStarted": "05/14/2026 11:36:30 AM"}];
+
+var G='#10b981',Y='#f59e0b',R='#ef4444',B='#3b82f6',P='#8b5cf6';
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('nav button').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function sBadge(s) {
+  if (s === 'COMPLETED') return '<span class="badge bg">Completed</span>';
+  if (s === 'IN_PROGRESS') return '<span class="badge by">In Progress</span>';
+  return '<span class="badge br">Not Started</span>';
+}
+
+function cBadge(c) {
+  return c === 'CSR' ? '<span class="badge bb">CSR</span>' : '<span class="badge bp">VA</span>';
+}
+
+function mkChart(id, type, data, opts) {
+  var c = document.getElementById(id);
+  if (!c) return;
+  var defaultOpts = { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 11, font: { size: 11 } } } } };
+  var merged = Object.assign({}, defaultOpts, opts || {});
+  if (opts && opts.scales) merged.scales = opts.scales;
+  if (opts && opts.plugins) merged.plugins = Object.assign({}, defaultOpts.plugins, opts.plugins);
+  new Chart(c, { type: type, data: data, options: merged });
+}
+
+function initFilters() {
+  var states = [...new Set(DATA.map(function(l){ return l.state; }))].sort();
+  var sel = document.getElementById('fState');
+  states.forEach(function(s){ var o = document.createElement('option'); o.value = s; o.text = s; sel.appendChild(o); });
+  var emps = [...new Set(DATA.map(function(l){ return l.empType; }))].sort();
+  var esel = document.getElementById('fEmp');
+  emps.forEach(function(e){ var o = document.createElement('option'); o.value = e; o.text = e; esel.appendChild(o); });
+}
+
+function renderLearners() {
+  var fc = document.getElementById('fCourse').value;
+  var fs = document.getElementById('fStatus').value;
+  var fst = document.getElementById('fState').value;
+  var fe = document.getElementById('fEmp').value;
+  var fq = document.getElementById('fSearch').value.toLowerCase();
+  var f = DATA.filter(function(l) {
+    return (!fc || l.courseShort === fc) && (!fs || l.status === fs) && (!fst || l.state === fst) && (!fe || l.empType === fe) && (!fq || l.name.toLowerCase().includes(fq) || l.hospital.toLowerCase().includes(fq));
+  });
+  document.getElementById('lcount').textContent = 'Showing ' + f.length + ' of ' + DATA.length + ' learners';
+  document.getElementById('ltbody').innerHTML = f.map(function(l) {
+    var ds = l.dateStarted ? l.dateStarted.split(' ')[0] : '-';
+    return '<tr><td style="font-weight:600">' + l.name + '</td><td>' + cBadge(l.courseShort) + '</td><td>' + l.hospital + '</td><td><span class="badge bgr">' + l.state + '</span></td><td>' + l.empType + '</td><td>' + sBadge(l.status) + '</td><td>' + (l.hours > 0 ? l.hours.toFixed(1) + ' hrs' : '-') + '</td><td style="color:var(--muted)">' + ds + '</td></tr>';
+  }).join('');
+}
+
+function buildHosp() {
+  var m = {};
+  DATA.forEach(function(l) {
+    var k = l.hospital;
+    if (!m[k]) m[k] = { name: k, state: l.state, csr: 0, va: 0, done: 0, ip: 0, ns: 0 };
+    l.courseShort === 'CSR' ? m[k].csr++ : m[k].va++;
+    if (l.status === 'COMPLETED') m[k].done++;
+    else if (l.status === 'IN_PROGRESS') m[k].ip++;
+    else m[k].ns++;
+  });
+  return Object.values(m).map(function(h) { return Object.assign({}, h, { total: h.csr + h.va, rate: Math.round(h.done / (h.csr + h.va) * 100) }); });
+}
+
+function renderHosp() {
+  var fp = document.getElementById('hfProg').value;
+  var fs = document.getElementById('hfSort').value;
+  var fq = document.getElementById('hfSearch').value.toLowerCase();
+  var d = buildHosp();
+  if (fp === 'csr') d = d.filter(function(h){ return h.csr > 0 && h.va === 0; });
+  else if (fp === 'va') d = d.filter(function(h){ return h.va > 0 && h.csr === 0; });
+  else if (fp === 'both') d = d.filter(function(h){ return h.csr > 0 && h.va > 0; });
+  if (fq) d = d.filter(function(h){ return h.name.toLowerCase().includes(fq); });
+  if (fs === 'total') d.sort(function(a,b){ return b.total - a.total; });
+  else if (fs === 'rate') d.sort(function(a,b){ return b.rate - a.rate; });
+  else d.sort(function(a,b){ return a.name.localeCompare(b.name); });
+  document.getElementById('htbody').innerHTML = d.map(function(h) {
+    var both = h.csr > 0 && h.va > 0;
+    var pc = h.rate >= 60 ? G : h.rate >= 30 ? Y : R;
+    var pb = '<div class="pbar"><div class="track"><div class="fill" style="width:' + h.rate + '%;background:' + pc + '"></div></div><span style="font-size:12px;font-weight:700">' + h.rate + '%</span></div>';
+    var badge = both ? '<span class="badge bp">Both</span>' : h.csr > 0 ? '<span class="badge bb">CSR</span>' : '<span class="badge bp">VA</span>';
+    return '<tr><td style="font-weight:600">' + h.name + '</td><td><span class="badge bgr">' + h.state + '</span></td><td>' + (h.csr || '-') + '</td><td>' + (h.va || '-') + '</td><td style="font-weight:700">' + h.total + '</td><td style="color:' + G + ';font-weight:700">' + h.done + '</td><td style="color:' + Y + ';font-weight:700">' + h.ip + '</td><td style="color:' + R + ';font-weight:700">' + h.ns + '</td><td>' + pb + '</td><td>' + badge + '</td></tr>';
+  }).join('');
+}
+
+function initCharts() {
+  mkChart('donut', 'doughnut', { labels: ['Completed', 'In Progress', 'Not Started'], datasets: [{ data: [29, 41, 33], backgroundColor: [G, Y, R], borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] });
+
+  mkChart('progComp', 'bar', { labels: ['VetBloom CSR', 'VA Program 2.0'], datasets: [{ label: 'Completed', data: [29, 0], backgroundColor: G, borderRadius: 4 }, { label: 'In Progress', data: [32, 9], backgroundColor: Y, borderRadius: 4 }, { label: 'Not Started', data: [16, 17], backgroundColor: R, borderRadius: 4 }] }, { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }, plugins: { legend: { position: 'bottom' } } });
+
+  var scCSR = {}, scVA = {};
+  DATA.forEach(function(l){ if (l.courseShort === 'CSR') scCSR[l.state] = (scCSR[l.state] || 0) + 1; else scVA[l.state] = (scVA[l.state] || 0) + 1; });
+  var allStates = [...new Set(DATA.map(function(l){ return l.state; }))].sort(function(a,b){ return ((scCSR[b]||0)+(scVA[b]||0)) - ((scCSR[a]||0)+(scVA[a]||0)); });
+  mkChart('stateChart', 'bar', { labels: allStates, datasets: [{ label: 'VetBloom CSR', data: allStates.map(function(s){ return scCSR[s]||0; }), backgroundColor: B, borderRadius: 4 }, { label: 'VA Program 2.0', data: allStates.map(function(s){ return scVA[s]||0; }), backgroundColor: P, borderRadius: 4 }] }, { indexAxis: 'y', scales: { x: { stacked: true, beginAtZero: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } });
+
+  var ecCSR = {}, ecVA = {};
+  DATA.forEach(function(l){ if (l.courseShort === 'CSR') ecCSR[l.empType] = (ecCSR[l.empType] || 0) + 1; else ecVA[l.empType] = (ecVA[l.empType] || 0) + 1; });
+  var allEmps = [...new Set(DATA.map(function(l){ return l.empType; }))].sort(function(a,b){ return ((ecCSR[b]||0)+(ecVA[b]||0)) - ((ecCSR[a]||0)+(ecVA[a]||0)); });
+  mkChart('empChart', 'bar', { labels: allEmps, datasets: [{ label: 'VetBloom CSR', data: allEmps.map(function(e){ return ecCSR[e]||0; }), backgroundColor: B, borderRadius: 4 }, { label: 'VA Program 2.0', data: allEmps.map(function(e){ return ecVA[e]||0; }), backgroundColor: P, borderRadius: 4 }] }, { indexAxis: 'y', scales: { x: { stacked: true, beginAtZero: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } });
+
+  var csrD = DATA.filter(function(l){ return l.courseShort === 'CSR'; });
+  var vaD = DATA.filter(function(l){ return l.courseShort === 'VA'; });
+  document.getElementById('csrHospCount').textContent = [...new Set(csrD.map(function(l){ return l.hospital; }))].length;
+  document.getElementById('vaHospCount').textContent = [...new Set(vaD.map(function(l){ return l.hospital; }))].length;
+  document.getElementById('csrAvgHours').textContent = (csrD.reduce(function(s,l){ return s+l.hours; }, 0) / csrD.length).toFixed(1) + ' hrs';
+  document.getElementById('vaAvgHours').textContent = (vaD.reduce(function(s,l){ return s+l.hours; }, 0) / vaD.length).toFixed(1) + ' hrs';
+
+  var csrEL = Object.entries(ecCSR).sort(function(a,b){ return b[1]-a[1]; });
+  var vaEL = Object.entries(ecVA).sort(function(a,b){ return b[1]-a[1]; });
+  mkChart('csrEmpChart', 'bar', { labels: csrEL.map(function(e){ return e[0]; }), datasets: [{ label: 'Learners', data: csrEL.map(function(e){ return e[1]; }), backgroundColor: B, borderRadius: 4 }] }, { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } });
+  mkChart('vaEmpChart', 'bar', { labels: vaEL.map(function(e){ return e[0]; }), datasets: [{ label: 'Learners', data: vaEL.map(function(e){ return e[1]; }), backgroundColor: P, borderRadius: 4 }] }, { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } });
+
+  var hd = buildHosp();
+  document.getElementById('totalHosp').textContent = hd.length;
+  document.getElementById('bothHosp').textContent = hd.filter(function(h){ return h.csr > 0 && h.va > 0; }).length;
+  var biggest = hd.slice().sort(function(a,b){ return b.total - a.total; })[0];
+  document.getElementById('bigHospVal').textContent = biggest.total;
+  document.getElementById('bigHospName').textContent = biggest.name;
+
+  var top12 = hd.slice().sort(function(a,b){ return b.total - a.total; }).slice(0, 12);
+  mkChart('hospBar', 'bar', { labels: top12.map(function(h){ return h.name.length > 22 ? h.name.slice(0,22)+'...' : h.name; }), datasets: [{ label: 'CSR', data: top12.map(function(h){ return h.csr; }), backgroundColor: B, borderRadius: 4 }, { label: 'VA', data: top12.map(function(h){ return h.va; }), backgroundColor: P, borderRadius: 4 }] }, { indexAxis: 'y', scales: { x: { stacked: true, beginAtZero: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } });
+
+  var hc = hd.filter(function(h){ return h.total >= 2; }).sort(function(a,b){ return b.rate - a.rate; }).slice(0, 14);
+  mkChart('hospComp', 'bar', { labels: hc.map(function(h){ return h.name.length > 22 ? h.name.slice(0,22)+'...' : h.name; }), datasets: [{ label: 'Completion %', data: hc.map(function(h){ return h.rate; }), backgroundColor: hc.map(function(h){ return h.rate >= 60 ? G : h.rate >= 30 ? Y : R; }), borderRadius: 4 }] }, { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } });
+}
+
+initFilters();
+renderLearners();
+renderHosp();
+initCharts();
+</script>
+</body>
+</html>
