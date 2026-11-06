@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Engagement Dashboard: CSR and VA Programs</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f3ef; --surface:#fff; --surface2:#f0ede8;
+  --ink:#1a1916; --ink2:#6b6860; --ink3:#a8a49e;
+  --rule:rgba(26,25,22,0.1); --rule2:rgba(26,25,22,0.05);
+  --green:#1a7a52; --green-bg:#e8f5ee;
+  --amber:#9c6a00; --amber-bg:#fdf3d9;
+  --red:#b83030; --red-bg:#fceaea;
+  --blue:#1a4f8a; --blue-bg:#e8f0fb;
+  --serif:'Instrument Serif',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;padding:40px 48px 60px;min-height:100vh;}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--rule);}
+.masthead h1{font-family:var(--serif);font-size:34px;font-weight:400;font-style:italic;line-height:1.1;letter-spacing:-0.3px;}
+.masthead-meta{font-size:12px;color:var(--ink3);margin-top:5px;font-family:var(--mono);}
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--rule);}
+.tab{background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--ink2);padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tab:hover{color:var(--ink);}
+.tab.active{color:var(--ink);font-weight:500;border-bottom-color:var(--ink);}
+.tab:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+.panel{display:none;} .panel.active{display:block;}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+select,input[type=text]{font-family:var(--sans);font-size:12px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;}
+input[type=text]{min-width:240px;}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.kpi-cell{background:var(--surface);padding:18px 20px;}
+.kpi-label{font-size:11px;color:var(--ink3);margin-bottom:9px;}
+.kpi-value{font-family:var(--mono);font-size:28px;font-weight:500;line-height:1;margin-bottom:5px;}
+.kpi-sub{font-size:11px;color:var(--ink3);line-height:1.45;}
+.grid{display:grid;gap:16px;margin-bottom:16px;}
+.g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr 1fr;} .g21{grid-template-columns:1.5fr 1fr;}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:20px 22px;min-width:0;}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:10px;}
+.card-title{font-size:13px;font-weight:500;}
+.card-sub{font-size:11px;color:var(--ink3);}
+.chart-box{position:relative;height:260px;}
+.chart-box.tall{height:340px;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;color:var(--ink3);font-weight:500;padding:0 8px 10px 0;border-bottom:1px solid var(--rule);text-align:left;white-space:nowrap;}
+th.r,td.r{text-align:right;}
+th.sortable{cursor:pointer;user-select:none;} th.sortable:hover,th.sortable.active{color:var(--ink);}
+.sort-arrow{margin-left:4px;font-size:9px;}
+td{padding:8px 8px 8px 0;border-bottom:1px solid var(--rule2);font-size:12px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.mono{font-family:var(--mono);font-size:12px;}
+.chip{display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;white-space:nowrap;}
+.c-green{background:var(--green-bg);color:var(--green);} .c-amber{background:var(--amber-bg);color:var(--amber);} .c-red{background:var(--red-bg);color:var(--red);} .c-blue{background:var(--blue-bg);color:var(--blue);} .c-grey{background:var(--surface2);color:var(--ink2);}
+.bar{height:5px;background:var(--surface2);border-radius:3px;margin-top:5px;overflow:hidden;width:100%;min-width:60px;}
+.bar>i{display:block;height:100%;background:var(--green);}
+.scroll{overflow-x:auto;}
+.empty{padding:20px 0;text-align:center;color:var(--ink3);font-size:12px;}
+.count{font-size:11px;color:var(--ink3);margin-left:auto;font-family:var(--mono);}
+@media(max-width:900px){body{padding:24px 16px 40px;}.kpi-strip{grid-template-columns:repeat(2,1fr);}.g2,.g3,.g21{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div>
+    <h1>Learning engagement: CSR and VA programs</h1>
+    <div class="masthead-meta" id="meta"></div>
+  </div>
+  <select id="progFilter" aria-label="Filter by program">
+    <option value="all">All programs</option>
+    <option>VetBloom CSR Program</option>
+    <option>VA Program 2.0</option>
+  </select>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" data-tab="overview" role="tab">Overview</button>
+  <button class="tab" data-tab="course" role="tab">Course detail</button>
+  <button class="tab" data-tab="learners" role="tab">Learner table</button>
+  <button class="tab" data-tab="hospitals" role="tab">Hospitals</button>
+</div>
+
+<section class="panel active" id="overview">
+  <div class="kpi-strip" id="kpis"></div>
+  <div class="grid g21">
+    <div class="card"><div class="card-head"><div class="card-title">Enrollments by month</div><div class="card-sub">Date started</div></div><div class="chart-box"><canvas id="chMonth"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Status mix</div></div><div class="chart-box"><canvas id="chStatus"></canvas></div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><div class="card-head"><div class="card-title">Learners by state</div><div class="card-sub">Stacked by status</div></div><div class="chart-box tall"><canvas id="chState"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Completion rate by employee type</div></div><div class="chart-box tall"><canvas id="chEmp"></canvas></div></div>
+  </div>
+</section>
+
+<section class="panel" id="course">
+  <div id="courseCards"></div>
+</section>
+
+<section class="panel" id="learners">
+  <div class="toolbar">
+    <input type="text" id="lSearch" placeholder="Search name, hospital, title, state" aria-label="Search learners">
+    <select id="lStatus" aria-label="Filter by status">
+      <option value="all">All statuses</option><option value="COMPLETED">Completed</option><option value="IN_PROGRESS">In progress</option><option value="NOT_STARTED">Not started</option>
+    </select>
+    <span class="count" id="lCount"></span>
+  </div>
+  <div class="card scroll"><table id="lTable">
+    <thead><tr>
+      <th class="sortable" data-k="name">Learner<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="program">Program<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="status">Status<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="hospital">Hospital<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="state">State<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="title">Title<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="started">Started<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="submitted">Completed<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="activeSecs">Active hrs<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="touch">Touch points<span class="sort-arrow"></span></th>
+    </tr></thead>
+    <tbody></tbody>
+  </table><div class="empty" id="lEmpty" style="display:none">No learners match these filters.</div></div>
+</section>
+
+<section class="panel" id="hospitals">
+  <div class="toolbar">
+    <input type="text" id="hSearch" placeholder="Search hospital or state" aria-label="Search hospitals">
+    <span class="count" id="hCount"></span>
+  </div>
+  <div class="card scroll"><table id="hTable">
+    <thead><tr>
+      <th class="sortable" data-k="hospital">Hospital<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="state">State<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="total">Learners<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="done">Completed<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="prog">In progress<span class="sort-arrow"></span></th>
+      <th class="sortable r" data-k="ns">Not started<span class="sort-arrow"></span></th>
+      <th class="sortable" data-k="rate" style="min-width:140px">Completion<span class="sort-arrow"></span></th>
+    </tr></thead>
+    <tbody></tbody>
+  </table><div class="empty" id="hEmpty" style="display:none">No hospitals match this search.</div></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DATA = {"rows": [{"name": "Maddox Abercrombie", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-09-26", "submitted": null, "touch": 77, "activeSecs": 172048, "title": "Veterinary Assistant", "hospital": "PetMedic - Edgewater", "state": "Maryland", "dept": "Urgent Care", "empType": "Veterinary Technician"}, {"name": "Nathan Acety", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-13", "submitted": "2026-06-26", "touch": 21, "activeSecs": 13927, "title": "Client Care Manager", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Jessica Adams", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-23", "submitted": null, "touch": 197, "activeSecs": 169724, "title": "Veterinary Assistant", "hospital": "Brookfield Animal Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Aaron Andreasen", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-30", "submitted": null, "touch": 97, "activeSecs": 746630, "title": "Veterinary Assistant", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Rachel Approbato", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-08", "submitted": null, "touch": 14, "activeSecs": 33783, "title": "Client Care Supervisor", "hospital": "Maine Veterinary Medical Center", "state": "Maine", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Lisa Arrigoni", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-06-12", "submitted": null, "touch": 4, "activeSecs": 1845, "title": "Client Service Representative", "hospital": "Prospect Veterinary Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Client Services"}, {"name": "Katie Bauer", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-26", "submitted": "2026-06-30", "touch": 68, "activeSecs": 58538, "title": "Client Service Representative", "hospital": "Hometown Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Beth Beecham", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-25", "submitted": "2026-03-27", "touch": 26, "activeSecs": 44275, "title": "Client Service Representative", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "dept": "General Practice", "empType": "Client Services"}, {"name": "Joanna Bell", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-05-13", "submitted": null, "touch": 271, "activeSecs": 421231, "title": "Veterinary Assistant", "hospital": "PetMedic - Edgewater", "state": "Maryland", "dept": "Urgent Care", "empType": "Veterinary Technician"}, {"name": "Tammy Benton", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-15", "submitted": null, "touch": 11, "activeSecs": 20900, "title": "ECC Liaison - PA", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Savannah Billado-Vincent", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-28", "submitted": "2026-06-01", "touch": 26, "activeSecs": 147480, "title": "Technician Assistant I", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "dept": "Ophthalmology", "empType": "Veterinary Support"}, {"name": "Brigid E Blake", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-06-04", "submitted": null, "touch": 1, "activeSecs": 36, "title": "Client Service Representative", "hospital": "Suncook River Veterinary Clinic", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Kristen Breitmaier", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-09", "submitted": null, "touch": 31, "activeSecs": 20211, "title": "Client Service Representative", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Client Services"}, {"name": "Ben Bricker", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-24", "submitted": null, "touch": 77, "activeSecs": 54534, "title": "Veterinary Assistant", "hospital": "Sunray Animal Clinic", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Evie Bricker", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-04-23", "submitted": null, "touch": 64, "activeSecs": 46145, "title": "Veterinary Assistant", "hospital": "Sunray Animal Clinic", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Kate Bures", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-24", "submitted": null, "touch": 45, "activeSecs": 33283, "title": "Client Service Representative - PA", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Christina Burton", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-27", "submitted": "2026-05-10", "touch": 56, "activeSecs": 51042, "title": "Client Service Representative", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Bonita Cannon", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-28", "submitted": null, "touch": 154, "activeSecs": 52352, "title": "Client Service Representative", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Katherine Carman", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-02", "submitted": null, "touch": 47, "activeSecs": 63198, "title": "Client Service Representative - Lead", "hospital": "New Hyde Park Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "Jessie Carney", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-09-29", "submitted": "2026-09-29", "touch": 60, "activeSecs": 13929, "title": "Client Service Representative", "hospital": "Suncook River Veterinary Clinic", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Paula Cintron", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-05", "submitted": null, "touch": 1, "activeSecs": 2700, "title": "Client Care Specialist", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Meghan Corless", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Assigned", "started": "2026-02-18", "submitted": "2026-04-21", "touch": 63, "activeSecs": 97707, "title": "Client Service Representative", "hospital": "Cambridge Veterinary Care", "state": "Massachusetts", "dept": "General Practice", "empType": "Client Services"}, {"name": "Ivana Coutinho", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-28", "submitted": null, "touch": 75, "activeSecs": 465670, "title": "Veterinary Assistant", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Maddy Cronis", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-08", "submitted": null, "touch": 23, "activeSecs": 623757, "title": "Client Service Representative", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Morgan Davis", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-07", "submitted": "2026-04-28", "touch": 52, "activeSecs": 33834, "title": "Practice Manager", "hospital": "Hometown Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Rebecca Davis", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-06-26", "submitted": null, "touch": 8, "activeSecs": 7167, "title": "Client Service Representative - Lead", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Gianna Dettorre", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-12", "submitted": null, "touch": 1, "activeSecs": 11, "title": "Program Manager", "hospital": "Rarebreed Veterinary Partners Corporate", "state": "Maine", "dept": "Enterprise Strategy and Project Oversight", "empType": "Corporate"}, {"name": "Anne DeWitt", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-09-22", "submitted": null, "touch": 7, "activeSecs": 909, "title": "Practice Manager", "hospital": "Madison Animal Hospital", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Penelope Dick", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-04-27", "submitted": null, "touch": 61, "activeSecs": 658842, "title": "Technician Assistant", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Veterinary Support"}, {"name": "Penelope Dick", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-18", "submitted": "2026-03-23", "touch": 103, "activeSecs": 17882, "title": "Technician Assistant", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Veterinary Support"}, {"name": "Caitlyn Dispensa", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-24", "submitted": "2026-05-04", "touch": 52, "activeSecs": 11590, "title": "Client Service Representative", "hospital": "Saugerties Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "Elizabeth Downs", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-08", "submitted": "2026-09-29", "touch": 25, "activeSecs": 17798, "title": "Technician Assistant", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Hannah Dunn", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-26", "submitted": "2026-06-15", "touch": 27, "activeSecs": 45033, "title": "Client Service Representative - Lead", "hospital": "Falmouth Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Lauren Flournoy", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-25", "submitted": null, "touch": 2, "activeSecs": 2864, "title": "Client Care Supervisor", "hospital": "Maine Veterinary Medical Center", "state": "Maine", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Anna Foster", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-03", "submitted": null, "touch": 48, "activeSecs": 42836, "title": "Client Service Representative - Lead", "hospital": "PetMedic - Portland", "state": "Maine", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Raven Fox", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-13", "submitted": "2026-03-29", "touch": 55, "activeSecs": 15093, "title": "Client Service Representative", "hospital": "NOVA Cat Clinic", "state": "Virginia", "dept": "General Practice", "empType": "Client Services"}, {"name": "Tracy Fox", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-30", "submitted": null, "touch": 14, "activeSecs": 142335, "title": "Veterinary Assistant", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Erika Gardner", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-09-03", "submitted": null, "touch": 72, "activeSecs": 47215, "title": "Veterinary Assistant", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Morgan Gilbert", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-08-17", "submitted": "2026-08-25", "touch": 61, "activeSecs": 22288, "title": "Technician Assistant", "hospital": "PetMedic - Portland", "state": "Maine", "dept": "Urgent Care", "empType": "Veterinary Support"}, {"name": "Cassidy Goulet", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-24", "submitted": null, "touch": 217, "activeSecs": 139711, "title": "Veterinary Assistant", "hospital": "Post Road Veterinary Clinic", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Amira Grymwell", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-05-19", "submitted": "2026-06-09", "touch": 48, "activeSecs": 19052, "title": "Technician Assistant", "hospital": "Kindred Spirits Veterinary Clinic", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Reanna Hagedorn", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-05-01", "submitted": null, "touch": 19, "activeSecs": 26366, "title": "Client Care Specialist - Lead", "hospital": "VSC Leesburg", "state": "Virginia", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Althea Hall", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-07-06", "submitted": null, "touch": 52, "activeSecs": 22978, "title": "Client Service Representative", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Jennifer Hamond", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-01", "submitted": "2026-04-10", "touch": 20, "activeSecs": 15920, "title": "Client Service Representative", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Saige Harris", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-04-23", "submitted": null, "touch": 288, "activeSecs": 85614, "title": "Technician Assistant", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Saige Harris", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-22", "submitted": "2026-04-27", "touch": 82, "activeSecs": 21851, "title": "Technician Assistant", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Victoria Hashey", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-04-08", "submitted": null, "touch": 2, "activeSecs": 1946, "title": "Office Manager", "hospital": "Kindred Spirits Veterinary Clinic", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Jenna Horn", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-13", "submitted": null, "touch": 12, "activeSecs": 10323, "title": "Client Service Representative", "hospital": "Kelly's Animal Hospital", "state": "Florida", "dept": "General Practice", "empType": "Client Services"}, {"name": "Trea Hsieh-Lewis", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-05-14", "submitted": null, "touch": 142, "activeSecs": 91180, "title": "Client Service Representative", "hospital": "PetMedic - Portland", "state": "Maine", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Christal Hutchins", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-04-23", "submitted": null, "touch": 241, "activeSecs": 163132, "title": "Veterinary Assistant I", "hospital": "Kennebunk Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Katelyn Hutchinson", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-05-09", "submitted": null, "touch": 2, "activeSecs": 18, "title": "Client Service Representative", "hospital": "Norway Veterinary Hospital", "state": "Maine", "dept": "Hybrid", "empType": "Client Services"}, {"name": "Sharon Jestand", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-21", "submitted": "2026-04-30", "touch": 53, "activeSecs": 62233, "title": "Client Service Representative - Lead", "hospital": "Saugerties Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "Aniyah Jeter", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-07-07", "submitted": null, "touch": 3, "activeSecs": 34, "title": "Veterinary Assistant", "hospital": "PetMedic - Edgewater", "state": "Maryland", "dept": "Urgent Care", "empType": "Veterinary Technician"}, {"name": "Nicole Keyser", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-06-11", "submitted": null, "touch": 1, "activeSecs": 0, "title": "Technician Assistant", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Veterinary Support"}, {"name": "Jennifer Krieger", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-23", "submitted": null, "touch": 1, "activeSecs": 8, "title": "Client Service Representative", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Client Services"}, {"name": "Daisy Llamas", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-05-06", "submitted": null, "touch": 18, "activeSecs": 9678, "title": "Veterinary Assistant", "hospital": "PetMedic - Edgewater", "state": "Maryland", "dept": "Urgent Care", "empType": "Veterinary Technician"}, {"name": "Sarah Lumenello", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-03-13", "submitted": null, "touch": 3, "activeSecs": 17798, "title": "Client Service Representative", "hospital": "Apple Country Animal Hospital", "state": "Massachusetts", "dept": "General Practice", "empType": "Client Services"}, {"name": "Mey Mateo", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-09", "submitted": null, "touch": 24, "activeSecs": 25251, "title": "Client Service Representative", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Caytee McCall", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-27", "submitted": null, "touch": 146, "activeSecs": 1153189, "title": "Client Service Representative", "hospital": "Prospect Veterinary Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Client Services"}, {"name": "Tammy McCarty", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2024-09-26", "submitted": "2024-10-04", "touch": 0, "activeSecs": 0, "title": "Client Service Representative", "hospital": "Kelly's Animal Hospital", "state": "Florida", "dept": "General Practice", "empType": "Client Services"}, {"name": "Leiah McDermott", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-04-30", "submitted": null, "touch": 3, "activeSecs": 30, "title": "Client Service Representative - Lead", "hospital": "Hudson Veterinary Care", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Emily Meck", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-03-12", "submitted": null, "touch": 91, "activeSecs": 14702, "title": "Client Service Representative - PA", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Lauren Mehl", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-27", "submitted": null, "touch": 2, "activeSecs": 59, "title": "Veterinary Assistant", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "dept": "Emergency and Critical Care", "empType": "Veterinary Technician"}, {"name": "Jeanette Mellen", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-23", "submitted": null, "touch": 41, "activeSecs": 49425, "title": "Client Service Representative", "hospital": "Claremont Animal Hospital", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Tammy Metras", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-14", "submitted": "2026-03-24", "touch": 20, "activeSecs": 8062, "title": "Client Service Representative", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Emilee Miller", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-22", "submitted": null, "touch": 74, "activeSecs": 15255, "title": "Client Service Representative", "hospital": "Claremont Animal Hospital", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Pamela Montgomery", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-10", "submitted": null, "touch": 1, "activeSecs": 109, "title": "Client Service Representative", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Elizabeth Moody", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-05-19", "submitted": null, "touch": 42, "activeSecs": 41805, "title": "Client Service Representative", "hospital": "Hudson Veterinary Care", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Wanda Mossie", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-05", "submitted": null, "touch": 1, "activeSecs": 154, "title": "Client Service Representative - PA", "hospital": "Royersford Veterinary Hospital", "state": "Pennsylvania", "dept": "General Practice", "empType": "Client Services"}, {"name": "Angela Moutria", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-29", "submitted": null, "touch": 37, "activeSecs": 14833, "title": "Office Manager", "hospital": "Hometown Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Jordan Ouellette", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-08-03", "submitted": null, "touch": 1, "activeSecs": 5, "title": "Client Service Representative", "hospital": "Westford Veterinary Emergency and Referral Center", "state": "Massachusetts", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Janet Parenti", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-16", "submitted": "2026-05-20", "touch": 61, "activeSecs": 18827, "title": "Practice Manager", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Abigail Perky", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-04-29", "submitted": null, "touch": 15, "activeSecs": 8842, "title": "Veterinary Assistant", "hospital": "Adirondack Veterinary Hospital", "state": "New York", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Bethany Pettegrow", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-07-23", "submitted": "2026-08-04", "touch": 49, "activeSecs": 114204, "title": "Client Service Representative", "hospital": "Eastern Maine Emergency Veterinary Clinic", "state": "Maine", "dept": "Emergency", "empType": "Client Services"}, {"name": "Coda Pickering", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-07-28", "submitted": null, "touch": 49, "activeSecs": 23315, "title": "Client Service Representative", "hospital": "Eastern Maine Emergency Veterinary Clinic", "state": "Maine", "dept": "Emergency", "empType": "Client Services"}, {"name": "Gianna Pires", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-23", "submitted": null, "touch": 219, "activeSecs": 94394, "title": "Technician Assistant", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Gianna Pires", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-17", "submitted": "2026-05-05", "touch": 84, "activeSecs": 38465, "title": "Technician Assistant", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Veterinary Support"}, {"name": "Kaylee Pisarski", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-13", "submitted": null, "touch": 60, "activeSecs": 41101, "title": "Client Service Representative - PA", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Tanya Pomelow", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-06-04", "submitted": null, "touch": 20, "activeSecs": 5020, "title": "Client Service Representative", "hospital": "Hometown Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Julie Ramey", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-03-27", "submitted": "2026-03-31", "touch": 12, "activeSecs": 37842, "title": "Client Service Representative - Lead", "hospital": "Ash Creek Animal Hospital & Spa", "state": "Connecticut", "dept": "General Practice", "empType": "Client Services"}, {"name": "Danielle Ramsey", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-06-03", "submitted": "2026-07-23", "touch": 12, "activeSecs": 17119, "title": "Client Service Representative", "hospital": "Suncook River Veterinary Clinic", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Tori Rand", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-06-25", "submitted": null, "touch": 35, "activeSecs": 14450, "title": "Client Service Representative - Lead", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Client Services"}, {"name": "Gesa Rappleyea", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-29", "submitted": "2026-05-01", "touch": 59, "activeSecs": 24393, "title": "Client Service Representative", "hospital": "Saugerties Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "Tori Ratcliffe", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-04-30", "submitted": null, "touch": 21, "activeSecs": 28124, "title": "Client Service Representative", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Sheri Reynolds", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-25", "submitted": null, "touch": 1, "activeSecs": 912, "title": "Client Service Representative", "hospital": "Sunray Animal Clinic", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Cheyenne Roy", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-06-18", "submitted": null, "touch": 1, "activeSecs": 75, "title": "Client Service Representative", "hospital": "Mann Memorial Veterinary Clinic", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Maeve Ryan", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-25", "submitted": "2026-05-27", "touch": 73, "activeSecs": 76574, "title": "Client Service Representative - Lead", "hospital": "Plattsburgh Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "Shana Sanders", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-01", "submitted": "2026-04-05", "touch": 43, "activeSecs": 15221, "title": "Client Service Representative", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Meghan Sandrib", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-05-13", "submitted": null, "touch": 40, "activeSecs": 20291, "title": "Veterinary Assistant - CVA", "hospital": "Aspetuck Animal Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Ranjita Sarki", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-03", "submitted": null, "touch": 1, "activeSecs": 67, "title": "Client Service Representative", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Richard Shah", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Assigned", "started": "2026-02-24", "submitted": "2026-02-24", "touch": 9, "activeSecs": 8077, "title": "Practice Manager", "hospital": "Winter Hill Veterinary Clinic", "state": "Massachusetts", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Jess Silva", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-03-13", "submitted": null, "touch": 11, "activeSecs": 4517, "title": "Client Service Representative", "hospital": "Brookfield Animal Hospital", "state": "Connecticut", "dept": "General Practice", "empType": "Client Services"}, {"name": "Jennifer Silver", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-13", "submitted": null, "touch": 30, "activeSecs": 24157, "title": "Not listed", "hospital": "Plattsburgh Animal Hospital", "state": "New York", "dept": "General Practice", "empType": "Client Services"}, {"name": "April Sitterson", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-06-09", "submitted": null, "touch": 1, "activeSecs": 132, "title": "Veterinary Assistant", "hospital": "Kelly's Animal Hospital", "state": "Florida", "dept": "General Practice", "empType": "Veterinary Technician"}, {"name": "Melissa Sivacek", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-03-09", "submitted": null, "touch": 4, "activeSecs": 139, "title": "Client Service Representative", "hospital": "Slade Veterinary Hospital", "state": "Massachusetts", "dept": "Hybrid", "empType": "Client Services"}, {"name": "Reilly Smith", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-28", "submitted": null, "touch": 47, "activeSecs": 119870, "title": "Client Service Representative", "hospital": "Southern Maine Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Christy Snowdon", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-04-02", "submitted": null, "touch": 1, "activeSecs": 17, "title": "Client Service Representative", "hospital": "Sunray Animal Clinic", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Kim Springer", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-20", "submitted": "2026-07-08", "touch": 66, "activeSecs": 1647956, "title": "Practice Manager", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Jacqueline Stehm", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-08-12", "submitted": null, "touch": 7, "activeSecs": 7178, "title": "Practice Manager", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Jacqueline Stehm", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-07-02", "submitted": null, "touch": 8, "activeSecs": 5531, "title": "Practice Manager", "hospital": "Casco Bay Veterinary Hospital", "state": "Maine", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Kathleen Steitz", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-23", "submitted": null, "touch": 36, "activeSecs": 13481, "title": "Client Service Representative - PA", "hospital": "Eastern Pennsylvania Veterinary Medical Center", "state": "Pennsylvania", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Becky Taisey", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Assigned", "started": "2026-05-26", "submitted": null, "touch": 163, "activeSecs": 403879, "title": "Veterinary Assistant", "hospital": "PetMedic - Freeport", "state": "Maine", "dept": "Urgent Care", "empType": "Veterinary Support"}, {"name": "Meghann Terrien", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-06-03", "submitted": "2026-10-16", "touch": 28, "activeSecs": 135693, "title": "Client Service Representative - Lead", "hospital": "Northside Animal Hospital", "state": "New Hampshire", "dept": "General Practice", "empType": "Client Services"}, {"name": "Karen Thompson", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-17", "submitted": "2026-06-25", "touch": 24, "activeSecs": 18850, "title": "Client Service Representative", "hospital": "Byram Animal Hospital", "state": "New Jersey", "dept": "General Practice", "empType": "Client Services"}, {"name": "Victoria Vanderbilt", "program": "VetBloom CSR Program", "status": "NOT_STARTED", "assign": "Self Enrolled", "started": "2026-03-28", "submitted": null, "touch": 1, "activeSecs": 11780, "title": "Client Service Representative", "hospital": "Burlington Emergency & Veterinary Specialists", "state": "Vermont", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Courtney Ventrone", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-03-13", "submitted": null, "touch": 1, "activeSecs": 7, "title": "Client Service Representative", "hospital": "PetMedic - Warwick", "state": "Rhode Island", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Lori Vogt", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-28", "submitted": "2026-05-12", "touch": 34, "activeSecs": 11932, "title": "Client Service Representative", "hospital": "Grady Veterinary Hospital", "state": "Ohio", "dept": "Client Care Services", "empType": "Client Services"}, {"name": "Brandie Washington", "program": "VetBloom CSR Program", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-04-29", "submitted": null, "touch": 13, "activeSecs": 15489, "title": "Client Service Representative", "hospital": "Hometown Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Client Services"}, {"name": "Carolyn Weinheimer", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-05-04", "submitted": "2026-07-06", "touch": 25, "activeSecs": 13202, "title": "Practice Manager", "hospital": "Apple Country Animal Hospital", "state": "Massachusetts", "dept": "General Practice", "empType": "Hospital Administration"}, {"name": "Cameryn Whitcomb", "program": "VA Program 2.0", "status": "IN_PROGRESS", "assign": "Self Enrolled", "started": "2026-05-13", "submitted": null, "touch": 15, "activeSecs": 80590, "title": "Client Service Representative - Lead", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Cameryn Whitcomb", "program": "VetBloom CSR Program", "status": "COMPLETED", "assign": "Self Enrolled", "started": "2026-04-01", "submitted": "2026-04-01", "touch": 22, "activeSecs": 10146, "title": "Client Service Representative - Lead", "hospital": "PetMedic - Westborough", "state": "Massachusetts", "dept": "Urgent Care", "empType": "Client Services"}, {"name": "Anna Yatskar", "program": "VA Program 2.0", "status": "NOT_STARTED", "assign": "Assigned", "started": "2026-05-14", "submitted": null, "touch": 9, "activeSecs": 204470, "title": "Veterinary Assistant", "hospital": "Southern Maine Veterinary Care", "state": "Maine", "dept": "General Practice", "empType": "Veterinary Technician"}], "asof": "2026-10-16"};
+const ALL = DATA.rows;
+const STATUS_LABEL = {COMPLETED:'Completed', IN_PROGRESS:'In progress', NOT_STARTED:'Not started'};
+const STATUS_COLOR = {COMPLETED:'#1a7a52', IN_PROGRESS:'#1a4f8a', NOT_STARTED:'#c9c5bd'};
+const STATUS_CHIP = {COMPLETED:'c-green', IN_PROGRESS:'c-blue', NOT_STARTED:'c-grey'};
+const STATUSES = ['COMPLETED','IN_PROGRESS','NOT_STARTED'];
+Chart.defaults.font.family = "'IBM Plex Sans',system-ui,sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#6b6860';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+const hrs = s => (s/3600).toFixed(1);
+const fmtDate = d => d ? new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+const count = (rows, st) => rows.filter(r => r.status === st).length;
+const group = (rows, key) => rows.reduce((m,r) => ((m[r[key]] = m[r[key]] || []).push(r), m), {});
+
+let charts = {};
+function draw(id, cfg){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), cfg); }
+const baseOpts = {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}};
+
+function current(){ const p = document.getElementById('progFilter').value; return p === 'all' ? ALL : ALL.filter(r => r.program === p); }
+
+function renderOverview(){
+  const rows = current();
+  const n = rows.length, done = count(rows,'COMPLETED'), ip = count(rows,'IN_PROGRESS'), ns = count(rows,'NOT_STARTED');
+  const active = rows.reduce((s,r) => s + r.activeSecs, 0);
+  const hosp = new Set(rows.map(r => r.hospital)).size;
+  document.getElementById('kpis').innerHTML = [
+    ['Enrollments', n, hosp + ' hospitals'],
+    ['Completed', done, pct(done,n) + '% of enrollments'],
+    ['In progress', ip, pct(ip,n) + '% of enrollments'],
+    ['Not started', ns, pct(ns,n) + '% of enrollments'],
+    ['Avg active time', n ? hrs(active/n) + ' h' : '0 h', 'per enrollment']
+  ].map(k => `<div class="kpi-cell"><div class="kpi-label">${k[0]}</div><div class="kpi-value">${k[1]}</div><div class="kpi-sub">${k[2]}</div></div>`).join('');
+
+  const months = [...new Set(rows.filter(r => r.started).map(r => r.started.slice(0,7)))].sort();
+  const progs = [...new Set(rows.map(r => r.program))];
+  const pal = {'VetBloom CSR Program':'#1a4f8a','VA Program 2.0':'#9c6a00'};
+  draw('chMonth', {type:'bar', data:{labels:months.map(m => new Date(m+'-01T00:00:00').toLocaleDateString('en-US',{month:'short',year:'2-digit'})),
+    datasets: progs.map(p => ({label:p, backgroundColor:pal[p], data: months.map(m => rows.filter(r => r.program===p && r.started && r.started.startsWith(m)).length)}))},
+    options:{...baseOpts, plugins:{legend:{display:progs.length>1, position:'bottom'}}, scales:{x:{stacked:true,grid:{display:false}}, y:{stacked:true, beginAtZero:true, ticks:{precision:0}}}}});
+
+  draw('chStatus', {type:'doughnut', data:{labels:STATUSES.map(s => STATUS_LABEL[s]), datasets:[{data:STATUSES.map(s => count(rows,s)), backgroundColor:STATUSES.map(s => STATUS_COLOR[s]), borderWidth:0}]},
+    options:{...baseOpts, cutout:'62%', plugins:{legend:{display:true, position:'bottom'}}}});
+
+  const byState = Object.entries(group(rows,'state')).sort((a,b) => b[1].length - a[1].length);
+  draw('chState', {type:'bar', data:{labels:byState.map(e => e[0]), datasets:STATUSES.map(s => ({label:STATUS_LABEL[s], backgroundColor:STATUS_COLOR[s], data:byState.map(e => count(e[1],s))}))},
+    options:{...baseOpts, indexAxis:'y', plugins:{legend:{display:true, position:'bottom'}}, scales:{x:{stacked:true, beginAtZero:true, ticks:{precision:0}}, y:{stacked:true, grid:{display:false}}}}});
+
+  const byEmp = Object.entries(group(rows,'empType')).sort((a,b) => b[1].length - a[1].length);
+  draw('chEmp', {type:'bar', data:{labels:byEmp.map(e => e[0] + ' (' + e[1].length + ')'), datasets:[{backgroundColor:'#1a7a52', data:byEmp.map(e => pct(count(e[1],'COMPLETED'), e[1].length))}]},
+    options:{...baseOpts, indexAxis:'y', scales:{x:{beginAtZero:true, max:100, ticks:{callback:v => v + '%'}}, y:{grid:{display:false}}}}});
+}
+
+function renderCourse(){
+  const sel = document.getElementById('progFilter').value;
+  const progs = sel === 'all' ? ['VetBloom CSR Program','VA Program 2.0'] : [sel];
+  const host = document.getElementById('courseCards');
+  host.innerHTML = '';
+  progs.forEach((p, i) => {
+    const rows = ALL.filter(r => r.program === p);
+    const n = rows.length, done = count(rows,'COMPLETED');
+    const finished = rows.filter(r => r.status === 'COMPLETED' && r.started && r.submitted);
+    const days = finished.map(r => (new Date(r.submitted) - new Date(r.started))/86400000);
+    const avgDays = days.length ? Math.round(days.reduce((a,b) => a+b,0)/days.length) : null;
+    const self = rows.filter(r => r.assign === 'Self Enrolled'), asg = rows.filter(r => r.assign === 'Assigned');
+    const byTitle = Object.entries(group(rows,'title')).sort((a,b) => b[1].length - a[1].length);
+    const el = document.createElement('div');
+    el.style.marginBottom = '28px';
+    el.innerHTML = `<h2 style="font-family:var(--serif);font-size:24px;font-weight:400;font-style:italic;margin-bottom:12px">${esc(p)}</h2>
+      <div class="kpi-strip">
+        <div class="kpi-cell"><div class="kpi-label">Enrolled</div><div class="kpi-value">${n}</div><div class="kpi-sub">${new Set(rows.map(r=>r.hospital)).size} hospitals</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Completion rate</div><div class="kpi-value">${pct(done,n)}%</div><div class="kpi-sub">${done} of ${n} completed</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Self-enrolled</div><div class="kpi-value">${self.length}</div><div class="kpi-sub">${pct(count(self,'COMPLETED'),self.length)}% completed</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Assigned</div><div class="kpi-value">${asg.length}</div><div class="kpi-sub">${pct(count(asg,'COMPLETED'),asg.length)}% completed</div></div>
+        <div class="kpi-cell"><div class="kpi-label">Avg days to finish</div><div class="kpi-value">${avgDays === null ? 'n/a' : avgDays}</div><div class="kpi-sub">${days.length} completions with dates</div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-head"><div class="card-title">Status by job title</div></div><div class="chart-box tall"><canvas id="ct${i}"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="card-title">Status by department</div></div><div class="chart-box tall"><canvas id="cd${i}"></canvas></div></div>
+      </div>`;
+    host.appendChild(el);
+    const stacked = (id, entries) => draw(id, {type:'bar', data:{labels:entries.map(e => e[0]), datasets:STATUSES.map(s => ({label:STATUS_LABEL[s], backgroundColor:STATUS_COLOR[s], data:entries.map(e => count(e[1],s))}))},
+      options:{...baseOpts, indexAxis:'y', plugins:{legend:{display:true, position:'bottom'}}, scales:{x:{stacked:true, beginAtZero:true, ticks:{precision:0}}, y:{stacked:true, grid:{display:false}}}}});
+    stacked('ct'+i, byTitle);
+    stacked('cd'+i, Object.entries(group(rows,'dept')).sort((a,b) => b[1].length - a[1].length));
+  });
+}
+
+let lSort = {k:'name', dir:1};
+function renderLearners(){
+  const term = document.getElementById('lSearch').value.trim().toLowerCase();
+  const st = document.getElementById('lStatus').value;
+  let rows = current().filter(r => (st === 'all' || r.status === st) &&
+    (!term || [r.name,r.hospital,r.title,r.state,r.program].join(' ').toLowerCase().includes(term)));
+  rows = rows.slice().sort((a,b) => {
+    const x = a[lSort.k], y = b[lSort.k];
+    if(x == null && y == null) return 0; if(x == null) return 1; if(y == null) return -1;
+    return (typeof x === 'string' ? x.localeCompare(y) : x - y) * lSort.dir;
+  });
+  document.querySelector('#lTable tbody').innerHTML = rows.map(r => `<tr>
+    <td style="font-weight:500">${esc(r.name)}</td><td>${esc(r.program)}</td>
+    <td><span class="chip ${STATUS_CHIP[r.status]}">${STATUS_LABEL[r.status]}</span></td>
+    <td>${esc(r.hospital)}</td><td>${esc(r.state)}</td><td>${esc(r.title)}</td>
+    <td class="r mono">${fmtDate(r.started)}</td><td class="r mono">${fmtDate(r.submitted)}</td>
+    <td class="r mono">${hrs(r.activeSecs)}</td><td class="r mono">${r.touch}</td></tr>`).join('');
+  document.getElementById('lEmpty').style.display = rows.length ? 'none' : 'block';
+  document.getElementById('lCount').textContent = rows.length + ' of ' + current().length + ' enrollments';
+}
+
+let hSort = {k:'total', dir:-1};
+function renderHospitals(){
+  const term = document.getElementById('hSearch').value.trim().toLowerCase();
+  const g = group(current(), 'hospital');
+  let rows = Object.entries(g).map(([h, rs]) => ({hospital:h, state:rs[0].state, total:rs.length, done:count(rs,'COMPLETED'), prog:count(rs,'IN_PROGRESS'), ns:count(rs,'NOT_STARTED'), rate:pct(count(rs,'COMPLETED'), rs.length)}))
+    .filter(r => !term || (r.hospital + ' ' + r.state).toLowerCase().includes(term));
+  rows.sort((a,b) => {
+    const x = a[hSort.k], y = b[hSort.k];
+    return (typeof x === 'string' ? x.localeCompare(y) : x - y) * hSort.dir;
+  });
+  document.querySelector('#hTable tbody').innerHTML = rows.map(r => `<tr>
+    <td style="font-weight:500">${esc(r.hospital)}</td><td>${esc(r.state)}</td>
+    <td class="r mono">${r.total}</td><td class="r mono">${r.done}</td><td class="r mono">${r.prog}</td><td class="r mono">${r.ns}</td>
+    <td><span class="mono">${r.rate}%</span><div class="bar"><i style="width:${r.rate}%"></i></div></td></tr>`).join('');
+  document.getElementById('hEmpty').style.display = rows.length ? 'none' : 'block';
+  document.getElementById('hCount').textContent = rows.length + ' hospitals';
+}
+
+function wireSort(tableId, state, render){
+  const ths = document.querySelectorAll('#' + tableId + ' th.sortable');
+  const mark = () => ths.forEach(t => { const on = t.dataset.k === state.k; t.classList.toggle('active', on); t.querySelector('.sort-arrow').textContent = on ? (state.dir === 1 ? '▲' : '▼') : ''; });
+  ths.forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if(state.k === k) state.dir *= -1; else { state.k = k; state.dir = ['name','program','status','hospital','state','title'].includes(k) ? 1 : -1; }
+    mark(); render();
+  }));
+  mark();
+}
+
+function renderAll(){ renderOverview(); renderCourse(); renderLearners(); renderHospitals(); }
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === t.dataset.tab));
+}));
+document.getElementById('progFilter').addEventListener('change', renderAll);
+['lSearch','lStatus'].forEach(id => document.getElementById(id).addEventListener('input', renderLearners));
+document.getElementById('hSearch').addEventListener('input', renderHospitals);
+wireSort('lTable', lSort, renderLearners);
+wireSort('hTable', hSort, renderHospitals);
+document.getElementById('meta').textContent = 'Data through ' + fmtDate(DATA.asof) + ' · ' + ALL.length + ' enrollments';
+renderAll();
+</script>
+</body>
+</html>
